@@ -20,7 +20,7 @@
  * class and thus when we create a object
  * of AdvCalculator in main this object will have access to both method of
  * AdvCalculator class itself and even that of
- * its parent class which Calculator.
+ * its parent class which is Calculator.
    Such kind of inheritance is single level inheritance.
  * 
  * 
