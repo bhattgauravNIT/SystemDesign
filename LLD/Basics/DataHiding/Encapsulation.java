@@ -1,4 +1,4 @@
-package Oops;
+package Datahiding;
 
 /**
  * Lets take an example of a human brain as it has some data may be his name,

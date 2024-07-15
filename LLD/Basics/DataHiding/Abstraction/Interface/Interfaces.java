@@ -1,4 +1,4 @@
-package Interface;
+package Datahiding.Abstraction.Interface;
 
 /**
  * So here we have an interface X and since we only want all public abstract
