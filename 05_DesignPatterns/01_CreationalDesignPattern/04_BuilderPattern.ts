@@ -35,6 +35,16 @@
  * 
  * Since we are using method chaining and thus the order to set the optional parameters does not matter.
  * 
+ * One simple question can arise here that instead of using a builder pattern, in order to solve this problem if we would
+ * have directly used normal Car class and provided default values for all optional parameters and simply
+ * used setter for all the parameters then during object creation, simply we could have used setter methods of only
+ * those parameters which we wanted to add and rest would have set by themselves to say null due to default
+ * initialization than also the problem would have been solved.
+ * 
+ * The answer is yes the problem would have been solved but it would have lead of object state inconsistency, 
+ * so set methods would not have been chained methods and thus execute one after the another and thus if in between
+ * setting of two set methods if there is a race condition then objects states were inconsistent.
+ * 
  */
 
 class Car {

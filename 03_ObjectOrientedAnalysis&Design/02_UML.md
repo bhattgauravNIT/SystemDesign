@@ -49,7 +49,7 @@ represented as ![alt text](Images/Component.png)
 
 g) Node:
 
-Node refers to the physical aspect of the system such as server as is represented as ![alt text](/Images/Node.png)
+Node refers to the physical aspect of the system such as server as is represented as ![alt text](Images/Node.png)
 
 
 Behavioral in things inside UML refers to the system interactions is composed of following:
