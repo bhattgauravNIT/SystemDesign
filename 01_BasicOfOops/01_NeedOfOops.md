@@ -1,5 +1,3 @@
-<!--
-
 Procedural programming (a step by step approach to solve a problem like breaking the code into
 procedures or functions which perform operation on data), is executed line by line and has some drawbacks 
 like scalability issues and security issues as global variables can be accessed and modified by multiple 
@@ -35,5 +33,3 @@ switchCandleState(){       // behavior or class method
 }
 
 }
-
->

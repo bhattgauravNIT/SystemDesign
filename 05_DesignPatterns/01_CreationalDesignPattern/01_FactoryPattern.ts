@@ -27,11 +27,14 @@
  * the class name and just simply using factory, thus in a way we have abstracted the object creation by hiding its implementations
  * details and also encapsulated the object creation within a single class.
  * 
+ * We can see that shape factory although returns Shapes , however there is no problem in return circle or rectangle etc
+ * this happens because of dynamic method dispatching or run time polymorphism. Since circle or rectangle implements Shapes
+ * and they act as references to Shape as well.
  */
 
 
 class ShapeFactory {
-    createShapes(shapes: String) {
+    createShapes(shapes: String): Shapes | null | undefined {
         if (shapes !== '') {
             if (shapes === 'Circle') {
                 return new Circle();

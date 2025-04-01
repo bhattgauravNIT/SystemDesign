@@ -123,5 +123,3 @@ let pCar = petrolFactory?.createCar();
 let pBike = petrolFactory?.createBike();
 pCar?.drive();
 pBike?.ride();
-
-

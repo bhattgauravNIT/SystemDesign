@@ -1,10 +1,10 @@
 /**
  * Builder pattern is used to create complex objects in multi step process like method chaining
  * while the overall process of object creation remains same.
+ * 
  * Lets understand a situation where a class constructor needs multiple parameters, thus it becomes very difficult
  * to remember the sequence of these parameters during object creation and moreover if some of these parameters are 
  * even optional then again it can cause a complex scenario for creation of object. In such situations builder pattern is used.
- * 
  * 
  * In below example we are creating a car class which needs many parameters like engine, wheels, stereoSystem and sunroof
  * now stereo system and sunRoof are optional parameters. We have considered only 4 parameters but lets consider a situation

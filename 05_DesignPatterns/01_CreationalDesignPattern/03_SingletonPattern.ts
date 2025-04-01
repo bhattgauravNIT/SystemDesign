@@ -38,6 +38,22 @@
  * This can be validated as console.log(log1 === log2); is true which means that the type as well as reference value of
  * both log1 and log2 are same and its a single object only.
  * 
+ * So in general a singleton design pattern is used when no new references of class needs to be created as maybe the job of the
+ * object is simply to invoke a function which just print a string so if we need to invoke this function n times why we need
+ * to created n instances we can do n times invoking with a single instance also. In such scenarios SingleTon design pattern comes
+ * into picture.
+ * 
+ * Lets understand the concept of lazy loading and eager loading with the help of singleton pattern.
+ * 
+ * Here we have created an static logger: Logger and have not initialized it.
+ * This getInitialized in getInstance method only if this instance is not present meaning its null or undefined.
+ * This concept that we load it whenever necessary is termed as lazy loading.
+ * 
+ * However if in case we would have initialized it at the start only like
+ * static logger: Logger = new Logger();
+ * 
+ * as soon as the class loader loads this class an instance of it would have created and thus its called
+ * eager loading. 
  * 
  */
 
