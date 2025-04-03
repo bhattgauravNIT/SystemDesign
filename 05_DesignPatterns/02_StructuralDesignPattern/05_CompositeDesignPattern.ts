@@ -28,7 +28,8 @@
  * So we wish to create a file/Folder system . A folder/file system can have multiple folders or multiple files or 
  * even single folder or single file etc nested within itself.
  * 
- * So we create a FileComponentSystem interface which is created to create reference of a file or a folder.
+ * So we create a FileComponentSystem interface which is created to create reference of a file or a folder as individual
+ * file and folder classes will be implementing it.
  * 
  * Now we have a file class which implements FileComponentSystem and thus can act as a reference of FileComponentSystem.
  * Now a file can have a name and thus this name is passed as parameter to constructor by user and is set to instance variable
@@ -38,8 +39,8 @@
  * and thus it will have a array of FileComponentSystem, It implements the FileComponentSystem interface and thus can act as a reference
  * for it.
  * 
- * Now it provides declaration to showDetails method which iterate over the array of FileComponentSystem, every element of FileComponentSystem
- * is either a File reference or a Folder reference and thus we can call showDetails method over it.
+ * Now it provides declaration to showDetails method which iterate over the array of FileComponentSystem, every element of 
+ * FileComponentSystem is either a File reference or a Folder reference and thus we can call showDetails method over it.
  * 
  * Now we can add FileComponentSystem reference to Folder class using addComponent which pushes FileComponentSystem reference to the
  * array, we can even remove a FileComponentSystem reference from the array using removeComponent using 
@@ -86,9 +87,11 @@
 
    Similarly we can perform other operations also
  * 
-   Thus we have designed a folder system using Composite design pattern, lets understand how it is following a composite design patter,
+   Thus we have designed a folder system using Composite design pattern, lets understand how it is following a 
+   composite design patter,
 
-   FileComponentSystem acts as main root of tree and a common interface or entry point in tree and can also be understood as component.
+   FileComponentSystem acts as main root of tree and a common interface or entry point in tree and can also be 
+   understood as component.
 
    File class acts as a leaf as no new hierarchy develops from it and this its a leaf and it implements FileComponentSystem.
    

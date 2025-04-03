@@ -15,7 +15,7 @@ method get invoked. So the same method when called under different circumstances
 polymorphism.
 
 Polymorphism can be attained used two ways:
-a) Method overriding / run time polymorphism
+a) Method overriding / run time polymorphism / dynamic method dispatch
 b) Method overloading / compile time polymorphism
 
 

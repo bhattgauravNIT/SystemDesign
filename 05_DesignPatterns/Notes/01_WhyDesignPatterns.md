@@ -15,11 +15,6 @@ There exists in general 4 types of design pattern:
 4) Architectural design pattern
 
 
-**Behavioral design pattern**
-
-Behavioral design pattern helps improving the communication between objects while maintaining loose
-coupling between them.
-Ex: Observer design patter
 
 **Architectural design pattern**
 

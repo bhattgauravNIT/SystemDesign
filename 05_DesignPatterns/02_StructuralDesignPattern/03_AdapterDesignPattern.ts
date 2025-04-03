@@ -1,7 +1,10 @@
 /**
  * 
- * Lets suppose we have two incompatible interface that cant wok together, so we place an adapter in between, the role
+ * Lets suppose we have two incompatible interface that can't wok together, so we place an adapter in between, the role
  * of this adapter is to make these two interfaces communicate and work together.
+ * 
+ * Lets consider a real world scenario I have a 3 pin charger and a 2 pin socket, this 3 pin charger can't fit in the 2 pin socket
+ * and thus we need a adapter in between.
  * 
  * So adapter design pattern bridges the gap between two incompatible interfaces and is best suited for integration
  * of third party services with our existing code.
@@ -10,9 +13,9 @@
  * 
  * Say we are a paymentGateway provider, at this time we can process standard transaction via say banks however
  * now the client say amazon which is using our payment gateway now wants paypal payments also to happen through our
- * gateway so paypal is a third party and has provided us with api to integrate with our code, clearly our code and
- * this third party paypal can't interact with each other directly thus we need a adapter in between so that our gateway can
- * support paypal payments as well.
+ * gateway so paypal is a third party library and we cant change anything in that library 
+ * paypal has provided us with api to integrate with our code, clearly our code and this third party paypal can't interact with each other 
+ * directly thus we need a adapter in between so that our gateway can support paypal payments as well.
  * 
  * Lets understand this with help of code.
  * 
@@ -21,12 +24,12 @@
  * 
  * So we have paymentGateway interface which has method declaration of processPayment.
  * 
- * Now The paypal which is a third party has provided us with Paypal payment interface which is PayPalPayment and it has
+ * Now The paypal which is a third party has provided us with Paypal payment and it has
  * a function makePaymentUsingPaypal which does its job of making payment.
  * 
  * Our interface can't interact with PaypalPayment directly as for that PayPayment needs to implement our interface 
- * PaymentGateway which they won't do as being gateway provider for payment its our responsibility to in corporate
- * 3rd party in our code.
+ * PaymentGateway which they won't do as being gateway provider for payment its a library which can't eb changed and 
+ * its our responsibility to in corporate 3rd party in our code.
  * 
  * Now the e-commerce will make payment through our gateway this means they will simply create an instance of PaymentGate
  * only in their code.

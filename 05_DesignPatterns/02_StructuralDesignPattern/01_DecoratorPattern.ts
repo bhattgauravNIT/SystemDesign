@@ -23,7 +23,7 @@
  * we need a coffee + milk + sugar class object say c3.
  * 
  * Here we can see that parent class can remain coffee but too many subclasses of coffee needs to be incorporated like
- * coffee + milk subclass and coffee + milk + sugar subclass.
+ * coffee + milk subclass and coffee + milk + sugar subclass, and say there can be n more number of variants that can happen.
  * 
  * Now suppose there are multiple add ons in future like honey, whipped cream, normal cream, sugarFree etc, thus multiple
  * permutations and combinations can happen which can affect the cost of 
@@ -38,19 +38,22 @@
  * Now we can have a basic coffee , so we created a basic coffee class it implements Coffee and thus we provide declaration for
  * cost and description.
  * 
- * Now we can have a coffeeDecorator which will help avoiding class explosion for basicCoffee class.
+ * Now we can have a coffeeDecorator which will help avoiding class explosion for basicCoffee class every other new feature like
+ * say milk will come on top of it . Coffee decorator implements Coffee interface.
+ * 
  * Coffee decorator class has a protected member variable of type Coffee, although coffee is an interface but what so ever classes
- * implementing this interface can be considered reference to it. The constructor of coffee decorator expects a object/reference of
- * Coffee as we can see in the constructor.
+ * implementing this interface can be considered reference to it via dynamic method dispatching.
+ *  
+ * The constructor of coffee decorator expects a object/reference of Coffee as we can see in the constructor.
  * 
  * The cost method returns the current cost of Coffee and the description returns the current description.
  * 
- * Now we want a Milk add on so we created a MilkDecorator
+ * Now we want a Milk add on so we created a Milk class
  * 
- * This milk decorator class extends coffeeDecorator and not BaseCoffee itself as we are trying to avoid class explosion for BasicCoffee.
- * Now this milk decorator is a child/subClass of CoffeeDecorator and overrides the cost and description methods of CoffeeDecorator class.
+ * This milk class extends coffeeDecorator and not BaseCoffee itself as we are trying to avoid class explosion for BasicCoffee.
+ * Now this milk is a child/subClass of CoffeeDecorator and overrides the cost and description methods of CoffeeDecorator class.
  * 
- * Similarly we have a sugarDecorator class. This sugar decorator class extends coffeeDecorator and not BaseCoffee itself as we are trying 
+ * Similarly we have a sugar class. This sugar decorator class extends coffeeDecorator and not BaseCoffee itself as we are trying 
  * to avoid class explosion for BasicCoffee. Now this sugar decorator is a child/subClass of CoffeeDecorator and overrides the cost 
  * and description methods of CoffeeDecorator class.
  * 
@@ -61,8 +64,8 @@
  * 
  * However if the user wants to have a milk addOn he can simply do
  * 
- * coffee = new MilkDecorator(coffee);
- * now the cost of coffee has added up with new cost from milk decorator and same with description.
+ * coffee = new Milk(coffee);
+ * now the cost of coffee has added up with new cost from milk and same with description.
  * 
  * now if the user wants to have an add on of sugar over this, it means that he is having an add on over basic coffee + milk
  * and not simply basic coffee and thus now the cost will change based on currentInstance cost + new add on cost of sugar
@@ -99,7 +102,7 @@ class BasicCoffee implements Coffee {
     }
 }
 
-class CoffeeDecorator {
+class CoffeeDecorator implements Coffee {
     protected coffee: Coffee;
 
     constructor(coffee: Coffee) {
@@ -115,7 +118,7 @@ class CoffeeDecorator {
     }
 }
 
-class MilkDecorator extends CoffeeDecorator {
+class Milk extends CoffeeDecorator {
     cost() {
         return this.coffee.cost() + 20;
     }
@@ -125,7 +128,7 @@ class MilkDecorator extends CoffeeDecorator {
     }
 }
 
-class SugarDecorator extends CoffeeDecorator {
+class Sugar extends CoffeeDecorator {
     cost() {
         return this.coffee.cost() + 10;
     }
@@ -141,11 +144,11 @@ console.log(coffee.cost());
 console.log(coffee.description());
 
 // Milk is wrapped over the basic coffee
-coffee = new MilkDecorator(coffee);
+coffee = new Milk(coffee);
 console.log(coffee.cost());
 console.log(coffee.description());
 
 // Sugar is wrapped over basic coffee + milk
-coffee = new SugarDecorator(coffee);
+coffee = new Sugar(coffee);
 console.log(coffee.cost());
 console.log(coffee.description());

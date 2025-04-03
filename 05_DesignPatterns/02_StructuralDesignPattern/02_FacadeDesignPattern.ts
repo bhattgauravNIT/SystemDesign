@@ -1,6 +1,6 @@
 /**
  * 
- * Facade design pattern is used to simply a larger and complex system of classes, so instead of dealing
+ * Facade design pattern is used to simplify a larger and complex system of classes, so instead of dealing
  * with multiple classes to perform an action, they can interact with one single facade class, so facade class
  * acts as a wrapper which hides the complexities associated with individual classes and provide a simpler unified approach
  * to the problem.
@@ -9,7 +9,7 @@
  * 
  * say we have a home theater so home theater can have multiple things like amplifier, projector, dvd, sound system etc.
  * Now say we want to watch a movie so ideally what we need to do is turn on dvd, turn on projector, turn on sound system,
- * turn of amplifier and play dvd. These are all the task associated with watching a movie, similarly if we want to turn off
+ * turn on amplifier and play dvd. These are all the task associated with watching a movie, similarly if we want to turn off
  * home theater than we have to turn off dvd, turn off projector, turn off sound system, turn off amplifier, these are
  * all the task associated with turing off a home theater.
  * 

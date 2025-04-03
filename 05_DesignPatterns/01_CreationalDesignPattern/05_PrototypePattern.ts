@@ -10,13 +10,14 @@
  * 
  * we have a car class and it has properties like color, weight, engine and we created an car1 obj,
  * now let us suppose we need to create a new object of car say car2 but only want to change the color rest of property 
- * it should inherit from car1 obj then it such cases we use Prototype pattern and prototype inheritance
- * allows us to do it. So prototype pattern is used when object creation is expensive and require a lot of initializations
+ * it should inherit from car1 obj or may be we need to create n number of similar
+ * objects exactly same like car1 configuration then in such cases we use Prototype pattern and prototype inheritance. 
+ * So prototype pattern is used when object creation is expensive and require a lot of initializations
  * however we want to create a new object with starting of properties of old object only. 
  * 
  * Lets consider below example:
  * 
- * We have a prototype interface which has a method declaration clone, whichsoever class implements it can implement 
+ * We have a prototype named interface which has a method declaration clone, whichsoever class implements it can implement 
  * clone method which can help creating prototype inheritance amongst its objects.
  * 
  * So Car class is having various properties like engine, weight, color and it has a parametrized constructor which

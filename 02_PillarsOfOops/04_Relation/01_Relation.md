@@ -1,5 +1,3 @@
-<!--
-
 In relationship association simply means that two classes are associated to each other, this association can be of
 two types i,e aggregation and composition.
 
@@ -105,5 +103,3 @@ This type of relationship is aggregation and also known as has-a relation.
 So in conclusion if lifetime of one object depends on another object then it is a part-of relationship
 or composition relationship, whereas in case the lifecycle of an object is not destroyed if lifecycle 
 of other object is destroyed but however still they need each other, then its a has-a relationship.
-
->

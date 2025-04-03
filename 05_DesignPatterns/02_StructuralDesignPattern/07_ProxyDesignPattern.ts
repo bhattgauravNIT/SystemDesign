@@ -2,7 +2,8 @@
  * 
  * Proxy design pattern is used when we need to substitute the main object with another proxy object,
  * the role of this proxy object can may be to provide access to this main object, or to delay the object
- * creation etc.
+ * creation etc. In general we can say that the role of this proxy object is to perform some pre determined operation
+ * before or after the main object's functionality.
  * 
  * Lets understand this with help of an example, say I have a file system such that only specific role
  * users can open the file. In this situation we provide a proxy object to the main file and check if the
@@ -19,6 +20,14 @@
  * return with unauthorized however if its authorized this means it needs to call openFile method of mainObject like
  * file system and thus we need a reference of fileSystem also in in this proxy class and using it we called
  * the main objects openFile method. 
+ * 
+ * Note that with
+ * 
+ *  if (!this.fileSystem) {
+        this.fileSystem = new FilesSystem(this.fileName);
+    }
+
+    we did an lazy loading that whenever an instance of file system is required then only it will create it.
  * 
  */
 
