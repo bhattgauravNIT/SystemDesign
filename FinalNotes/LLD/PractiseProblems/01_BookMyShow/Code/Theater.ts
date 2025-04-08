@@ -1,14 +1,15 @@
 import { Show } from "./Show";
 
 export class Theater {
+    private static theater_id = 0;
     private id: number;
     private _name: string;
     private _location: string;
     private _capacity: number;
     private _shows: Show[];
 
-    constructor($id: number, name: string, location: string, capacity: number) {
-        this.id = $id;
+    constructor(name: string, location: string, capacity: number) {
+        this.id = Theater.theater_id++;
         this._name = name;
         this._location = location;
         this._capacity = capacity;
@@ -93,6 +94,11 @@ export class Theater {
      */
     public set shows(value: Show[]) {
         this._shows = value;
+    }
+
+    public updateShow(oldShow: Show, newShow: Show) {
+        this.shows = this.shows.filter((val) => val === oldShow);
+        this.shows.push(newShow);
     }
 
 }
