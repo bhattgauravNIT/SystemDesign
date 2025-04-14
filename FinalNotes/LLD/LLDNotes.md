@@ -3297,7 +3297,7 @@ while (iterator.hasNext()) {
 }
 ```
 
- 4. **Strategy Design pattern**
+4. **Strategy Design pattern**
 
 Strategy pattern helps us to bind multiple algorithms together in our unit at run time i,e through
 dynamic method dispatching. Once the client mentions the strategy/algorithm through which he needs that
@@ -3476,4 +3476,3 @@ supervisor.setNextHandler(manager);
 agent.handleRequest("low");
 agent.handleRequest("medium");
 agent.handleRequest("high");
-
