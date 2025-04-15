@@ -1,4 +1,4 @@
-2) **Airline booking system:**
+**Airline booking system:**
 
 The problem is to create a airline booking system, for example when we search for flights in 
 pay tm or say amazon flights or say sky scanner.
