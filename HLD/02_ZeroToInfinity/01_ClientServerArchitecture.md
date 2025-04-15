@@ -18,7 +18,7 @@ Thick clients are those which predominantly relies little to no on server and do
 at client side only ex: games like call of duty.
 
 
-**Single server architecture:**
+**Two tier architecture:**
 
 So we have a server and consider we have a single server. A server can do multiple things like say
 perform logical operation on data, store the data , manages web traffic, serves files , serves media etc.
@@ -38,6 +38,8 @@ Every port has some specific port number so consider this server of our does
 logical operation on data at port 20 which means 47.35.98.10:20
 data storing at port 30 which means 47.35.98.10:30
 web traffic management at port 40 which means 47.35.98.10:40
+
+Port are basically used to identify network service on a server.
 
 Now in this architecture there is a problem, first if server crashes the application entirely will went down so
 its prone to failure now suppose suddenly the traffic on the website increases and thus this single server will
