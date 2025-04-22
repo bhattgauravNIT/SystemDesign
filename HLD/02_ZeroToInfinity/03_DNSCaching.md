@@ -19,6 +19,9 @@ Now these DNS cache can have many type of NS(name server) records
 1) A -> Stores IPV4 address for named domains
 2) AAAA -> Stores IPV6 address for named domains
 3) CNAME -> connanical name like www.google.com and google.com are same
+4) MX( mail exchange ) record -> Specifies the email server responsible for receiving email corresponding to a domain
+5) NX record -> Specifies the authoritative server corresponding to a domain name
+6) Text record -> Stores text data corresponding to a domain name.
 
 
 If the user clears the cache of his browser then before the TTL even these DNS cache can get removed.
@@ -39,5 +42,5 @@ from memory means it was cached in our RAM
 logo.png is freshly downloaded.
 
 
-Amazon cloud's Route 53 is a DNS web service provider which can help creating host zones i,e
+Amazon cloud's Route 53 is a DNS web service provider hosted on cloud which can help creating host zones i,e
 zones where we can map our domain with some IP'S of different types of Named servers like A, AAAA etc.
