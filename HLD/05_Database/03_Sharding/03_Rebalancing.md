@@ -26,7 +26,7 @@ Now lets talk about the various sharding strategies.
 
 **a) Hash rebalancing**
 
-Leys suppose we have sharded our data using some sharding strategy and at this time the data looks like
+Leys suppose we have sharded our data using hash based sharding strategy and at this time the data looks like
 
 S0 -> 4,8,12,16
 S1 -> 1,5,9,13
@@ -133,6 +133,13 @@ In this way scaling up and scaling down can be taken care optimally without move
 to dynamic partition. Just this is based upon hash.
 
 
+**Increasing system availability**
+
+Sharding can help in system availability as if one node goes down then only a small portion or a portion of data will be unavailable
+while rest system can keep running, moreover database like cassandra uses consistent hashing, and also maintain data for say
+node s2 i,e from 65->128 in S3 node as well, so in case S2 node goes down then s3 node will be able to accommodate for this failure.
+
+
 Note:
 
 Note point here is sharding makes architecture complex and we should try n avoid it until necessary.
@@ -144,7 +151,7 @@ So before going to sharding we can say
 2) If for say some case 1% request need 20 years old data rest 99% need new data so keep new data in db while migrate old data
  to some cheap storage like s3.
 
-3) We can always create multiple clusters of nodes with most recent data in some cluster and then little older in some other
+1) We can always create multiple clusters of nodes with most recent data in some cluster and then little older in some other
    cluster with less computation power nodes .
 
 So overall sharding should be the last option to resort to. 
