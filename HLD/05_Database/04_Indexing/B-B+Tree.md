@@ -5,7 +5,9 @@ B trees first.
 
 **B trees:**
 
-B tree is an generalization idea for BST and M way search tree and is a self-balancing tree data structure.
+B tree is an generalization idea for BST and M way search tree and is a self-balancing tree data structure and is balanced
+meaning all leaves are at same level, this ensures that worst case search complexity always remains logarithmic.
+
 B tree unlike BST can have more than 2 children as having only 2 children can lead to significant height of tree
 which will eventually take up more disc space.
 
@@ -25,7 +27,8 @@ Say we have id's corresponding to users in database coming as:
 Now we need to create a B tree of order m=4 say, every id will point to a block id in disc with help of which we will be able
 to reach the block in disc where this data is stored.
 
-1) Tree is empty → put [20] in root
+1) Tree is empty → put [20] in root, [20] is a node which has a key, every key will have a id i,e 20 and reference to the disk where
+   actual data corresponding to this id is being stored.
 
 2) Tree node can have max m-1 keys i,e 3 keys conditions satisfied insert 30 in same node [20,30]
    
@@ -61,7 +64,7 @@ to reach the block in disc where this data is stored.
                                              [50,80]
                                 [20,30,40]              [60,70]       [90]
 
-9) 45 comes in, it reaches node [20,30,40], m-1 will get violated, so node should have looked like [20,30,40,45], we need to split
+9)  45 comes in, it reaches node [20,30,40], m-1 will get violated, so node should have looked like [20,30,40,45], we need to split
    [20,30][40,45], via right bias 40 goes to root, root is [50,80] no m-1 is violated thus it can accommodate 40, B tree becomes
 
                                                 [40,50,80]
@@ -97,7 +100,8 @@ as we need some haphazard traversal in Btree to get it and its time consuming.
 
 
 In order to solve this we use B+ tree, B+ tree is similar to B tree apart from few enhanced properties like all
-data pointers are stored in leaf nodes only and all the leaf nodes are connected via each other in form of linked list.
+data pointers are stored in leaf nodes and all non -leaf nodes contains pointers to its child nodes only and all the leaf 
+nodes are connected via each other in form of linked list.
 
 So in order to have all data pointers in leaf, leaf should have all nodes .
 
@@ -109,3 +113,29 @@ Thus The B+ tree for incoming data flow
                             [15,20] ->  [25,30] ->  [40,45]     ->       [50,60,70] ->  [80,90]
 
 This structure solve issues with range queries.
+
+
+Different databases allows the user to create index on a table's column like mongo db. 
+
+
+Now there can be two types of indexes while considering indexing in DBMS
+
+**a) Dense index:**
+
+An index is considered as a Dense index if say we are creating an index on user_id column on users table and it have 1000 records
+then all 1000 user_id entries will be present in indexes, i,e key of indexes as user_id and value as the location or id of block where
+this data is stored, all of them will be present in indexes.
+
+Although it uses more storage in disc as all records are present but also ensures faster searches.
+
+It happens by default in mongo while creating a index.
+
+
+**b) Sparse index**
+
+An index is considered as a Sparse index if say we are creating an index on user_id column on users table and it have 1000 records
+then not all 1000 user_id entries as keys will be present in indexes, say only first 100 user_id 's will be present.
+
+Its memory saving and is helpful when only latest data is to be searched consistently. 
+
+This has to be specifically mentioned while creating index for a table's column.

@@ -6,7 +6,7 @@ small component of the wholesome data.
 
 Ex: Say I have 5 nodes in a database cluster and A->E is present in node1, F->M is present in node 2 and so on.
 
-So its a way of diving data across multiple nodes.
+So its a way of dividing data across multiple nodes.
 
 There are two types of sharding 
 
