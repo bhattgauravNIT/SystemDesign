@@ -42,10 +42,15 @@ Cache hit ratio = Cache Hit/Total request(cache miss + cache hit).
 
 to be 0.8 to 0.95%.
 
+So overall When a request is first made, it triggers a database query—a process known as a cache miss.
+The result is then saved in the cache before being returned to the user. On subsequent requests for the same data, the application checks the cache first to see if the data is available.
+If it is, this is called a cache hit, and the result is quickly returned from the in-memory store.
+In web application setup, we might use an application server cache and an in-memory store like Redis.
+
 
 **Why cache is fast**
 
 A simple question can pop up that why cache is fast. Cache performance depends upon where it is stored, what its storing and how
 its accessed. Cache like Redis, Memcached stores data in RAM on local network which makes it way more faster.
 
-The storing also is no complex data structure its like a simple key-> value pairs , these all things makes cache fast.
+The storing also is no complex data structure its like a simple key-> value pairs , these all things makes cache fast. 

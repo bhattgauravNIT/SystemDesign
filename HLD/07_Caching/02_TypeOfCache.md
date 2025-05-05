@@ -56,3 +56,5 @@ the server checks the cache, if cache hit, responds back to the request, in case
 the data and place it in cache and responds back to request. Now since the data is now present in global cache, so when this
 request comes again and say previously it was being served by s1 server, however now load balancer sends it to s3 server, so
 s3 also will interact with same global cache, finds the data and responds back. 
+
+So this cache is shared upon multiple applications on a single machine.
