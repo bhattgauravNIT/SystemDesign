@@ -39,7 +39,7 @@ However this design has a flaw, since the max limit what our load balancer can w
 be eventually able to handle only 10k req/sec and thus the problem is not solved.
 
 The correct or the ideal way of doing it is once the client made a request, it will get to DNS for resolution of the IP, so if the
-DNS resolves that request which will hit our server into 2 A type DNS record, two because we have two load balancer, so suppose our load balancer1 has ip IP1 and load balancer 2 has IP , IP2 so the DNS record which will be there after DNS resolution of the request will be
+DNS resolves that request which will hit our server 2, a type DNS record, two because we have two load balancer, so suppose our load balancer1 has ip IP1 and load balancer 2 has ip IP2 so the DNS record which will be there after DNS resolution of the request will be
 
 A -> [IP1, IP2]
 
