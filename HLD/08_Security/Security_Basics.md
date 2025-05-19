@@ -101,7 +101,7 @@ Lets understand the flow, say the user submits its user name and password , it g
 authDb or some IDP like okta or google etc,
 its verified and thus the server creates a JWT token,  now this JWT token is send back to client and is stored
 in local storage or some secured cookies, now the user makes subsequent request to the server for some other services,
-all these request and sended along with the token, the server checks the expiration of the token, if token is valid and 
+all these request and sended along with the token may be as a header, the server checks the expiration of the token, if token is valid and 
 the user has the necessary role to perform that operation, the server responds back. 
 
 
