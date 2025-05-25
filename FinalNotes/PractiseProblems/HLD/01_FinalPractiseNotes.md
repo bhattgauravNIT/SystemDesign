@@ -1,6 +1,17 @@
 HLD Practice Notes
 
 
+**Generic approach**:
+
+The generic approach is to first understand the requirements like how many users, whats the active user per day.
+Then to come up with some computation like DB requirements, network etc.
+
+After that create services which will be used for different main main use case.
+Then dive deep into every service. Compute possibility of this service having its own DB , sharding, shard key etc.
+See twitter design for example.
+
+
+
 1) **Design rate limiter**
 
 Rate limiter is generally used to prevent our service from over burning or over used, say we have a application which
@@ -263,6 +274,7 @@ however this does not gives user the understanding that whats the limit or when 
 such scenarios some specific request headers can also be sent along the rejected request like like Retry-After or X-RateLimit-Limit.
 
 
+
 **2) Design object store (S3: simple storage service)**
 
 s3 bucket is a object store which stores data in form of objects in cloud. An object store like s3 has certain things like
@@ -290,11 +302,11 @@ size of every object can be 100kb.
 
 So the overall size is (1*10^6) * 10 * 100 * (100*10^3) = 10^9 * 10^5 = 10^14 = 1pb
 
-10^3 = 1kb (kilo byte)
-10^6 = 1MB (mega byte)
-10^9 = 1GB (giga byte)
-10^12 = 1TB (tera byte)
-10^15 = 1PB (peta byte)
+10^3 = 1kb (kilo byte) - Thousand
+10^6 = 1MB (mega byte) - Million
+10^9 = 1GB (giga byte) - Billion
+10^12 = 1TB (tera byte) - trillion
+10^15 = 1PB (peta byte)  - Quadrillion
 
 so we have to create a bucket of 1PB. 
 
@@ -397,11 +409,11 @@ Now say we can have 1 disc of 1Tb so in order to store 1pb of data we need 10^15
 Now 1000 disc or nodes is a very huge number and even if on scaling say the data needed becomes more like 50Pb thus more number of nodes/disc
 will be needed. 
 
-Now there can be two ways here, one we consider one node or disc in one shard and also creates replicas of shard , so in case any node is down
+Now there can be two ways here, one we consider one node or disc in one shard and also creates replicas of shard , so in this case if any node is down
 then the replica will be able to handle the request but it needs over head as during write operations, replicas needs to be synchronized
 to main node and also adds up to space as replicas are present.
 
-Another way can be to create one shard of say 3 nodes.  Now any of these  3 nodes are replicas and contains data, in case any node goes down,
+Another way can be to create one shard of say 3 nodes.  Now any of these  3 nodes are not replicas and contains main data, in case any node goes down,
 there is a chance of entire data loss and thus a replica of this shard is needed, in case the main shards node goes down then a new node
 can be up in main shard and the data can be replicated from the replica's shard node and by that time the replica's shard node can
 take care of the operations.
@@ -413,3 +425,400 @@ If our application is global then why a Indian user need to send data to a US se
 on geo location.
 
 So say Indian user data will go to Indian data center and US user data will go to US data center.
+
+Now coming to the point of scaling regional database, since our main storage is composed of disc and there fore, the orchestra service 
+can maintain the size of the disc as well, and say in case any node or disc reaches above 70% then system generates advisory to create more
+nodes or disc.
+
+Now since we are designing a cheap storage and thus we prefer an HDD over an SDD. Moreover lets talk about data organization inside this HDD as
+data organization plays a major role on in performance of disc storage even like HDD.
+
+Data storage refers to how data is arranged physically and logically and helps in performance while dealing with huge amount of data. A bad
+data organization like dumping everything into one folder makes read/write relatively very slow and thus proper data organization techniques
+need to be taken while storing such huge chunk of data like 1Pb.
+
+a) File per object data organization:
+
+In file per object data organization, the bucket name in case of s3 will be considered as folder whereas every object inside the bucket
+will be considered as a file so its like a folder-file storing technique. Although it looks relatively simple however this is a big problem
+with file per object data organization as every file system stores data in fixed block sizes, generally 4kb. Now if a file is lesser than
+4kb say even 1000bytes then also 4kb fragment will be used, and say 3kb file is there then also a 4k fragment is used.
+For a 4.2kb file two block segments will be used i,e 8kb. So ideally this is leading to memory wastage. In simple if we have all 4.5 kb files
+then 500mb of files storage will take 1Tb of disc space.  Thus a better and more prominent data organization technique needs to be taken into consideration.
+
+b) WAL( write ahead log) data organization:
+
+In WAL (Write-Ahead Log) data organization, instead of writing each object as a separate file, we append all 
+objects to a single data.log file and maintain a key → offset index in memory.
+
+Each object entry contains metadata like key, size, and checksum (to ensure integrity).
+
+When a PUT request comes, we append the object to the log and update the index.
+
+So suppose a user uploads three objects so we update the index as 
+{
+  "img1": 0,
+  "img2": 120,
+  "img3": 340
+}
+
+and write to data log file as:
+
+PUT key: "img1", value: <100 bytes>
+PUT key: "img2", value: <200 bytes>
+PUT key: "img3", value: <300 bytes>
+
+
+When a GET request comes, we use the index to find the offset and read the object from the log.
+This is more efficient than file-per-object storage, especially for small files, because:
+It avoids the overhead of managing many individual files (which can waste disk space and inodes)
+It enables fast, sequential writes
+
+now img 1 has size 100 bytes and offset is 0, means if someone wants img1 then start from 0 till 100 bytes and you can get the img1,
+similarly for img2 starts form  120 bytes and see 200 bytes from 120 bytes to get img2.
+
+Now one observation is like the offset of img2 is set from 120 bytes although img1 size is 100 bytes only as remaining 20bytes is
+left for some meta data like say header or checksum. This checksum can be used to check the integrity of the data that its not corrupted etc.
+
+Now once a read query comes, in it goes to index file and get the corresponding offset for that object key, now goes to data log file
+and get the data based upon the offset.
+
+WAL approach is better as compared to file per object data organization as it don't lead to wastage of memory via maintaining offsets.
+
+For deletion of an object inside the bucket, we remove the entry from the index and say in data log pass a boolean with mark to delete as true.
+Regular garbage collector can work to remove these mark to delete entries.
+
+
+
+
+**3) Tiny url generator**
+
+A tiny url generator's responsibility is convert a long url which may be even composed with additional parameters like
+say query params etc to a short understandable url like say a long url like 
+
+https://www.geeksforgeeks.org/batch/sd-self-paced-2/track/Design-Problems/video/MTU5MzM%3D
+
+can be shortened to https://tinyurl.com/2jrm27h3.
+
+Once the user clicks on or makes request to the short url internally he is redirected to long url only.
+
+Now lets understand the use cases that why such system is needed. Sometimes we are doing some campaigns and people are generally
+reluctant on clicking on long urls which also indicates campaigns so these short urls can act as disguise even, moreover
+sometimes with these long URL's the QR code which we want to scan becomes more denser but with short url these QR's are even less dense
+and easier to scan.
+
+So there are two main functionalities which our tiny url generator can perform one
+
+post (i,e generating a short url corresponding to a long url) -> payload: long url -> response short url
+
+get(hits the short url and gets redirected to long url interface only) -> short url -> redirects to long url interface.
+
+Now lets do some guesstimates in order to understand our system requirements.
+
+Say we are designing an application for around 5M users i,e 5 * 10^6 users. Now consider this application as read intensive
+where the R/W or read/write ratio is 100, i,e per 100 reads one write can happen which is fair depending upon the use case.
+
+Write here means a post request to get the short url corresponding to a long url.
+Read here means hitting or sending the short url and reaching to the long url.
+
+Now, say this application for now is designed for 5 years and can be eventually scaled up. The application serves a use case for
+analytical point of view even, i,e say for a marketing campaign we need to even see how many clicks were there on the short url.
+
+It should not generate predictable links as it then becomes vulnerable to DDOS attack like some dictionary attack in which
+attacker might try hitting all possible urls which can be derived from the long url.
+
+Lets try to get some parameters like QPS, bandwidth, storage needed.
+
+QPS: i,e query per second.
+
+  An fair assumption can be that 5M urls are created per day. Meaning 5M/24*60*60 urls are created per second.
+  So 5*10^6/20*50*50 (approx) = 5*10^6/50*10^3 = 10^6/10^4 = 100 request/second 
+
+  100 req/second are write request.
+
+Now R/W ration in application was 100 so say 100*100 = 10k req/sec for read.
+
+Storage: How much storage is needed.
+
+  Storage will come to picture for write operations, say a long url is to be mapped to a short url.
+  Combining the sizes of long url and short url we can say long url can be avg 170bytes where as the short url will be around
+  30 bytes so total url size will be around 200bytes approx.
+
+  there are 100 req/sec for write So in five years
+
+  5 years has 5 * 365 * 24 * 60 * 60 seconds 
+  100 req in 1 sec so
+
+  100 * 5 * 365 * 24 * 60 * 60 req in 5 years.
+
+  1 req is approx size 200bytes so 100 * 5 * 365 * 24 * 60 * 60 req will have size
+
+  (100 * 5 * 365 * 24 * 60 * 60 * 200) = (100 * 5 * 400 * 30 * 60 * 60 * 200) = 10^9 * 4320 ~= 5000 * 10^9 = 5* 10^12 = 5TB
+
+  Now we need to store 5Tb of data thus our choice of database should be the one which by default supports
+  sharding like mongo Db.
+
+Bandwidth:
+
+  Predominantly the application is read intensive, 1 write there are 100 reads so read can be taken into consideration
+  for bandwidth estimation.
+
+  There are 10k read request/sec and the url size which gets responded back is a long url approx 20bytes.
+
+  10k * 20 /sec = 2 * 10^4/sec even if we increase this approximation say 2 * 10^6 = 2Mb/sec or even may be say 10 mb/sec
+  which is very suitable bandwidth estimation as most modern network can support this.
+
+
+Now we have mentioned that we will also be needing some analytical say how many time the tiny url is clicked
+so this means there should not be caching at client side and every time the client request for get on short url
+it should reach to server, to ensure this we can use HTTP code 307.
+
+307 HTTP code means: Temporary redirects and the url is not cached at the source or the client.
+
+In contrary an HTTP code 301 means moved permanently and the url is cached at the source or the client.
+
+So lets understand the high level design how it can look like:
+
+Client sends a request to generate tiny url from long url, reaches server. The server can have a cache which will be used
+in read operations. The server can generate a tiny url corresponding to the ling url and store it in database.
+
+Now lets understand how much cache are we talking about.
+
+We agreed the application is read intensive and 10k req/sec for read is coming. Say if we store data for 7 days. 
+
+However we will be storing say a store map like 
+
+{
+
+  shortUrl: longUrl
+
+}
+
+so short url can be say 20bytes and long url say be 180 bytes so overall 200bytes.
+
+So 10k * 7 * 60 * 60 * 200 = 36*7*10*10^5* 200 = 37*7 * 10^6 * 200~= 50*7 * 10^6* 200 ~= 450*10^6 * 200=  90*10^9 = 90Gb
+
+Caching 90Gb is not a very big deal for modern applications and cache like redis cache. And its not that cost inefficient, 
+thus we can cache 90GB data. Here the cache eviction policies can come into picture that how will we be evicting data from our cache once
+cache size is reached.
+
+Now lets talk about key generation algorithm , that how will we be able to generate a tiny url from a long url.
+
+**a) Using hash:**
+ 
+Hashing algo like SHA256 or MDS can be used to compute hash corresponding to the long url however, the hash generated is of some length and
+this length plays a vital role in determining the size of RAM, storage etc. Thus lets understand that what size could be best suited for our
+short url.
+
+Now the overall characters that can be taken into consideration while shortening url is
+
+a-z, A-Z and 0-9 which is 26*2 + 10 = 62.
+
+Now lets see how many tiny url we need to generate in 5 years
+
+we agreed above that 5M urls are created per day and thus in 5 years it will be 5M * 5 * 365 ~= 5M * 5 * 400 = 100* 10^8 = 10*10^9 = 10B
+
+so considering 62 over all characters to be considered from thus the ideal length 
+
+62^6 = 60B, thus we can say 6 length is ideal.
+
+Now if we use an MDs hashing algo thus it generates a 32 char long hash which is non repetitive and its pattern cant be determined.
+However since we saw that our ideal length is coming somewhere around 6 so a 32 long char is not needed. Thus we can even splice
+or can find random 7 index from the MDS generated hash and then use them to store the tiny url corresponding to long url.
+An possibility of collision can always arise. Meaning that a long url being resolved to same short url can be generated which are used before
+
+and therefore lets talk about collision handling methods which can be incorporated:
+
+1) when we take 6 length, the total urls which we can support is 60B our need was 10B. So its above only however on increasing the 
+length of the url like say 7 or 8 then we can reduce the possibility of collision to a great extent. But this needs more space.
+
+2) However even if still collision happens then we can use concept of salt, in this what happens lets say we generate a short url and this url
+was already present in our db, so we increase the salt so before we were trying to formulate short url for
+
+https://www.geeksforgeeks.org/batch/sd-self-paced-2/track/Design-Problems/video/MTU5MzM%3D and it resulted in formulation of short url like
+
+https://tinyurl.com/2jrm27h3.
+
+Now this url is already in use for some other url and thus we provide a salt like we generate a tiny url for 
+
+https://www.geeksforgeeks.org/batch/sd-self-paced-2/track/Design-Problems/video/MTU5MzM%3D-1 where 1 is the id, now we generate a short url for it
+again if this results in a collision then we increase the id to 2 and so on.
+
+
+Now these all things increase overhead on our application service as first a tiny url has to be generated and then this tiny url has to be
+verified that its not present in db and if it validates then only we insert this in db else we regenerate it.
+
+Thus a better and efficient approach will be to introduce a key manager service whose responsibility is to generate keys asynchorunlsy.
+
+**b) Generating keys offline:**
+
+So initially this key manager services generate 100K urls and it can have its own db and thus store them. Now a request say a post request comes to main
+application service, this application service can have its own cache. Now the application service asks the key manager to provide a key. This key
+is used as short url for the requested long url. Now this gets inserted in the DB of application service and as a cache.
+
+In case a certain threshold is reached as used keys in key manager db then it can again asynchronously start generating keys. Which can be used by the
+application service.
+
+
+Regarding the concept of monitoring, i,e the number of clicks we can use services like prometheus and grafana which can helps us state logs
+and visual live monitoring.
+
+
+
+**4) Designing twitter platform**
+
+Lets suppose we have total users in twitter as 1.5 billion. Now with these huge amount of users we need to scale down the problem
+so say we need to consider only active users so the number of active users in the application per day is 500 million users i,e 1/3rd 
+of total users in twitter. Lets consider an avg of 1 tweet per user per day and reads 50 tweets per day.
+Support for media search as no for simplicity of problem and search functionality in application as no for now but we can 
+consider it as a add on feature later on. When a user logs in, he needs to see the tweets of his followings for say last one day.
+
+Now lets consider some guesstimates.
+
+Write- 1tweet per user per day. So 1 tweet per user. Total users 500M. Thus 500M tweets per day.c
+Read- 1 user reads 50 tweets per day so total reads are 50 * 500M = 50 * 500 * 10^6 = 25*10^9 tweet read per day.
+
+Storage- 
+
+Consider every tweet to be max 250 char, and 1 char as 1 byte so total 250 bytes. Consider 50 bytes additional for metadata etc.
+So one tweet is 300 bytes. 
+
+Total capacity = writes = 500M tweets * 300bytes per day = 500*10^6 * 300 = 15*10^4*10^6 = 15*10^10 bytes per day
+Consider capacity for 5 years = 400 * 5 * 15*10^10 = 20*15 * 10^12 = 300 * 10^12 = 300Tb approx
+
+Network requirement:
+
+(Read + write per day)*tweet size -> (25*10^9 tweets per day read + 500M writes per day)* 300
+
+(25*10^9 tweets per day read + 500M writes per day)* 300
+= (25*10^9 + 500 * 10^6)*300 = 7.65 TB/day
+
+Now we need to store 300Tb of data for 5 years for simple write of tweets , any data between 1-2Tb is not generally
+considered for sharding, however this system needs sharding.
+
+Now lets consider some major services in our application:
+
+User service:
+
+User service will be responsible for creating user, making a user follow another user and getting users followers.
+
+Post -> /user/new (creates new user)
+Post -> /user/follow (jay started following another user)
+Get -> /user/followers (get all followers of a user)
+
+
+Tweet service:
+
+Tweet service will be responsible for getting the tweets which the user can read and post a user tweet.
+
+Get -> /tweet
+Post -> /tweet
+
+
+Search service:
+
+Lets say this service is responsible for searching a tweet say /tweet/?searchString.
+
+So the high level design of our twitter for now looks like:
+
+Clients makes a request, goes to load balancer, this request properly gets redirected to user service or tweet service or search service.
+
+
+Now lets dive deep into User service:
+
+Primary goal of user service is to cater info about user for registration and also to maintain data about followers so we can have
+two tables.
+
+Lets consider a data model for users.
+
+{
+  id: xxxxx
+  userName: xxxxxx
+  handle: xxxxxx
+  Dob: xxxxx
+  email: xxxxxx
+}
+
+consider a total size of 100 bytes/record.
+There can be total 1.5B users so table size needed will be 100 * 1.5B = 1.5 * 10^9 * 100 = 1.5 * 10^11 ~= 1.5/10 * 10^12 = 0.15Tb data.
+Generally 1-2Tb is fine so we can say there is no much need to shard the user table. However if in case we need to distribute users
+globally say US, India etc so its better to have sharding as make distributed system and moreover in this regional distribution we don't want
+request from India to go to say US db's and it can increase latency.
+
+Now we can also maintain another table for maintaining followers for a user so, 
+
+the data modal in this case can be
+
+{
+  id: xxxx
+  user_id:xxxx
+  follow_id: xxxxx
+}
+
+Consider the total data model size to be around 50bytes.
+Consider an average a person follows 1000 people and there are 1.5B users
+So total size needed here is 1.5B * 50 * 1000 = 10^13 * 1.5 = 15Tb 
+
+This needs sharding as 15Tb is well above 1TB-2Tb shard limit.
+
+Now shard key is imp is consideration for sharding and thus the main query pattern in this case is 
+give me all the followers for a user so user_id is ideal candidate for consideration of shard key.
+
+Now question arises do we need indexing on these tables if yes then on which column. For users table we need need
+indexing as users data will be needed when he wants to see his profile so its not queried frequently.
+However for the use case when user wants to see tweets we will give him the tweets of the people he follows i,e
+a continuous query on the followers table is made to fetch followers corresponding to the user and thus a index needs to
+be maintained on user_id in followers table.
+
+
+Let dive deep to tweet service so the data model for tweet service can be:
+
+{
+  tweet_id: xxxx
+  user_id: xxxxx
+  tweet_time: xxxx
+  tweet_content: xxxxxx
+}
+
+which can be approx 400bytes.
+
+Now user can make 1 tweet per day amd we want to store tweets for 5 years which we calculated above as 300Tb approx.
+
+Now comes imp discussion about the shard key in this case as sharding needs to happen for such huge amount of data and
+the main point is that when user wants to see tweets we provide him with tweets of his followings which are 1 day old.
+So does this data should be shard on tweet_time or user_id or tweet_id is an imp discussion.
+
+Lets say we consider tweet_time considering the use case that user wants to see tweets we provide him with tweets of his followings 
+which are 1 day old.
+
+So what will happen is that say data from 2017-2018 will reside in one node, similarly for subsequent years.
+Now every year a new hotspot will be on that node where all data is being written because say in 2024-2025 all data
+will be written in one node and thus it becomes a hotspot and is prone to failure.
+
+Now lets consider we shard based on user_id so there will be some people whom are followed by millions of people
+some very famous personalities and if they write data, that node can become hotspot. Although its still better than time stamp
+shard key but still few people can make or break the system. Moreover if few very huge followings are resided in one node it
+can cause latencies.
+
+Now if we consider tweet_id as shard key then also there can be a problem, as user want to see all tweets of his following for say
+past 1 day and thus the read query becomes very slow and request has to be sent to all shards as there is no way to know
+that the request which user is making resides in which shard. And generally say if we have 100 shards and all 100 shards are needed t0
+be checked for a request its not a good approach. 7-8 shards querying is still considered fine.
+
+Thus in order to find correct shard key its better to look for some middle ground which can be
+user_id-timestamp this shard key is better as compared to considering any other shard key as it servers the purpose.
+
+So lets say my node 1 contains data for 1->5M users for last 1 day, shard 2 contains data for 1->5M users for last 1-3 days,
+similarly other, so in case of read if i need data for say 1000 users coming in range 1->5M for 1 day, we know which node
+to search for.
+
+Now sharding can happen on columns which we index upon, so in this case we need to index upon two columns, ie, time stamp and
+user_id and thus writes can becomes a little slow.
+
+In order to optimize it, in many db the primary key is by default indexed and can be used for sharding and thus, rather than
+creating any arbitrary primary key, we can make user_id + time stamp as primary key and thus it will be indexed by db and
+can be used for sharding.
+
+
+Now search service can be a add on in our application. In this we can use text search db, like elastic search which is helpful for
+searching in data.
